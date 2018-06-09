@@ -66,6 +66,8 @@ public:
     return image_;
   }
 
+  float getCameraTemperature();
+
 protected:
   void assignDefaultValues();
 

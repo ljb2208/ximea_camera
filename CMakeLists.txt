@@ -34,7 +34,7 @@ set(XIMEA_SRC
     src/ximea_driver.cpp
     src/ximea_ros_driver.cpp
     src/ximea_ros_cluster.cpp
-    src/ximea.cpp
+    src/ximea.cpp    
 )
 
 add_executable(ximea_camera_node ${XIMEA_SRC})

@@ -475,3 +475,13 @@ void ximea_driver::limitBandwidth(int mbps)
   // stat = xiSetParamInt(xiH_, XI_PRM_LIMIT_BANDWIDTH , mbps);
   // errorHandling(stat, "could not limit bandwidth");
 }
+
+float ximea_driver::getCameraTemperature()
+{
+  if (!xiH_) return 0.0;
+
+  float temperature_c=0;
+  xiGetParamFloat(xiH_, XI_PRM_TEMP, &temperature_c);
+
+  return temperature_c;
+}
