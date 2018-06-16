@@ -1,0 +1,5 @@
+<library path="lib/libXimeaCameraNodelet">
+  <class name="ximea_camera/XimeaCameraNodelet" type="ximea_camera::XimeaCameraNodelet" base_class_type="nodelet::Nodelet">
+    <description>This is the nodelet for the Ximea Camera Driver.</description>
+  </class>
+</library>

@@ -78,6 +78,7 @@ void ximea_driver::applyParameters()
       setAutoExposurePriority(auto_exposure_priority_);
   }
   setROI(rect_left_, rect_top_, rect_width_, rect_height_);
+  setOtherParams();
 }
 
 void ximea_driver::openDevice()
@@ -243,6 +244,11 @@ void ximea_driver::setROI(int l, int t, int w, int h)
   errorHandling(stat, "xiSetParamInt (aoi top)");
   xiGetParamInt(xiH_, XI_PRM_OFFSET_Y XI_PRM_INFO_INCREMENT, &tmp);
   std::cout << "top increment " << tmp << std::endl;
+}
+
+void ximea_driver::setOtherParams()
+{
+  xiSetParamInt(xiH_, XI_PRM_TEMP_SELECTOR, XI_TEMP_SENSOR_BOARD); 
 }
 
 void ximea_driver::setExposure(int time)
@@ -478,10 +484,69 @@ void ximea_driver::limitBandwidth(int mbps)
 
 float ximea_driver::getCameraTemperature()
 {
-  if (!xiH_) return 0.0;
+  if (!xiH_) return -1.0;
 
-  float temperature_c=0;
+  float temperature_c=0;  
   xiGetParamFloat(xiH_, XI_PRM_TEMP, &temperature_c);
 
   return temperature_c;
 }
+
+
+float ximea_driver::getGain()
+{
+  if (!xiH_) return 0.0;
+
+  float gain=0;
+  xiGetParamFloat(xiH_, XI_PRM_GAIN, &gain);
+
+  return gain;
+}
+
+
+float ximea_driver::getWBRed()
+{
+  if (!xiH_) return 0.0;
+
+  float value=0;
+  xiGetParamFloat(xiH_, XI_PRM_WB_KR, &value);
+
+  return value;
+}
+
+
+float ximea_driver::getWBGreen()
+{
+  if (!xiH_) return 0.0;
+
+  float value=0;
+  xiGetParamFloat(xiH_, XI_PRM_WB_KG, &value);
+
+  return value;
+}
+
+float ximea_driver::getWBBlue()
+{
+  if (!xiH_) return 0.0;
+
+  float value=0;
+  xiGetParamFloat(xiH_, XI_PRM_WB_KB, &value);
+
+  return value;
+}
+
+
+  void ximea_driver::setGain(float gain)
+  {
+    if (!xiH_) return;
+
+    xiSetParamFloat(xiH_, XI_PRM_GAIN, gain);    
+  }
+  void ximea_driver::setWhiteBalance(float red, float green, float blue)
+  {
+    if (!xiH_) return;
+
+    xiSetParamFloat(xiH_, XI_PRM_WB_KR, red);
+    xiSetParamFloat(xiH_, XI_PRM_WB_KG, green);
+    xiSetParamFloat(xiH_, XI_PRM_WB_KB, blue);
+  }

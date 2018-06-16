@@ -57,6 +57,7 @@ public:
   void setAutoExposureLimit(int ae_limit);
   void setAutoGainLimit(int ag_limit);
   void setAutoExposurePriority(float exp_priority);
+  void setOtherParams();
   bool hasValidHandle()
   {
     return xiH_ == NULL ? false : true;
@@ -67,6 +68,15 @@ public:
   }
 
   float getCameraTemperature();
+  float getGain();
+  float getWBRed();
+  float getWBGreen();
+  float getWBBlue();
+
+  void setGain(float gain);
+  void setWhiteBalance(float red, float green, float blue);
+
+  XI_IMG image_;
 
 protected:
   void assignDefaultValues();
@@ -93,8 +103,7 @@ protected:
   bool acquisition_active_;
   std::string image_data_format_;  // One of XI_MONO8, XI_RGB24, XI_RGB32, XI_RAW
   std::string yaml_url_;
-  HANDLE xiH_;
-  XI_IMG image_;
+  HANDLE xiH_;  
   int image_capture_timeout_;  // max amount of time to wait for an image to come in
   unsigned char trigger_mode_;
 };

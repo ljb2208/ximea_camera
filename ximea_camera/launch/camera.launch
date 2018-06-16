@@ -1,0 +1,41 @@
+<launch>
+   <!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
+       If not specified, defaults to first camera found. -->
+  <arg name="camera_name" default="leftCamera" />
+  <arg name="camera_serial" default="31703351" />
+  <arg name="calibrated" default="0" />
+  <arg name="exposure_time" default="30000" />
+  <arg name="rect_left" default="0" />
+  <arg name="rect_top" default="0" />
+  <arg name="rect_height" default="1024" />
+  <arg name="rect_width" default="1280" />
+  <arg name="image_data_format" default="XI_RGB24" />
+
+  <group ns="$(arg camera_name)">
+    <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
+
+    <node pkg="nodelet" type="nodelet" name="camera_nodelet"
+          args="load ximea_camera/XimeaCameraNodelet camera_nodelet_manager" >
+      <param name="frame_id" value="camera" />
+      <param name="serial" value="$(arg camera_serial)" />
+      <param name="image_data_format" value="$(arg image_data_format)" />
+
+      <!-- When unspecified, the driver will use the default framerate as given by the
+           camera itself. Use this parameter to override that value for cameras capable of
+           other framerates. -->
+      <!-- <param name="frame_rate" value="15" /> -->
+
+      <!-- Use the camera_calibration package to create this file -->
+      <param name="camera_info_url" if="$(arg calibrated)"
+             value="file://$(env HOME)/.ros/camera_info/$(arg camera_serial).yaml" />
+
+      <param name="yaml_url" value="$(find ximea_camera)/config/ximeaLeft.yaml" />
+    </node>    
+
+<!--
+    <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
+          args="load image_proc/debayer camera_nodelet_manager">
+    </node>
+-->
+  </group>
+</launch>
