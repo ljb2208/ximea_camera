@@ -26,7 +26,7 @@ All rights reserved.
 #include <ximea_camera/ximea_driver.h>
 
 
-#include <ximea_camera/WFOVImage.h>
+#include <wfov_camera_msgs/WFOVImage.h>
 
 #include <string>
 #include <algorithm>
@@ -152,7 +152,7 @@ private:
     double max_acceptable; // The maximum publishing delay (in seconds) before warning.
     pnh.param<double>("max_acceptable_delay", max_acceptable, 0.2);
     ros::SubscriberStatusCallback cb2 = boost::bind(&XimeaCameraNodelet::connectCb, this);
-    pub_.reset(new diagnostic_updater::DiagnosedPublisher<ximea_camera::WFOVImage>(nh.advertise<ximea_camera::WFOVImage>("image", 5, cb2, cb2),
+    pub_.reset(new diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage>(nh.advertise<wfov_camera_msgs::WFOVImage>("image", 5, cb2, cb2),
                updater_,
                diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_, freq_tolerance, window_size),
                diagnostic_updater::TimeStampStatusParam(min_acceptable, max_acceptable))); 
@@ -289,7 +289,7 @@ private:
         case STARTED:
           try
           {
-             ximea_camera::WFOVImagePtr wfov_image(new ximea_camera::WFOVImage);
+             wfov_camera_msgs::WFOVImagePtr wfov_image(new wfov_camera_msgs::WFOVImage);
             // Get the image from the camera library
             NODELET_DEBUG("Starting a new grab from camera.");
             xm_.acquireImage();
@@ -312,12 +312,13 @@ private:
             // Set other values
             wfov_image->header.frame_id = frame_id_;
 
-            wfov_image->gain = gain_;
-            wfov_image->white_balance_blue = wb_blue_;
-            wfov_image->white_balance_red = wb_red_;
+            wfov_image->gain = xm_.image_.gain_db;
+            wfov_image->white_balance_blue = xm_.getWBBlue();
+            wfov_image->white_balance_red = xm_.getWBRed();            
+            wfov_image->white_balance_green = xm_.getWBGreen();
 
-            wfov_image->temperature = xm_.getCameraTemperature();
-
+            wfov_image->temperature = xm_.getCameraTemperature();          
+            wfov_image->exposure_time = xm_.image_.exposure_time_us;  
 
             ros::Time time = ros::Time::now();
             wfov_image->header.stamp = time;
@@ -507,7 +508,7 @@ void setImageDataFormat(std::string image_format)
   boost::shared_ptr<image_transport::ImageTransport> it_; ///< Needed to initialize and keep the ImageTransport in scope.
   boost::shared_ptr<camera_info_manager::CameraInfoManager> cinfo_; ///< Needed to initialize and keep the CameraInfoManager in scope.
   image_transport::CameraPublisher it_pub_; ///< CameraInfoManager ROS publisher
-  boost::shared_ptr<diagnostic_updater::DiagnosedPublisher<ximea_camera::WFOVImage> > pub_; ///< Diagnosed publisher, has to be a pointer because of constructor requirements
+  boost::shared_ptr<diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage> > pub_; ///< Diagnosed publisher, has to be a pointer because of constructor requirements
   ros::Subscriber sub_; ///< Subscriber for gain and white balance changes.
 
   sensor_msgs::CameraInfoPtr ci_; ///< Camera Info message.

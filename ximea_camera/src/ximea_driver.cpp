@@ -495,7 +495,7 @@ float ximea_driver::getCameraTemperature()
 
 float ximea_driver::getGain()
 {
-  if (!xiH_) return 0.0;
+  if (!xiH_) return -1.0;
 
   float gain=0;
   xiGetParamFloat(xiH_, XI_PRM_GAIN, &gain);
@@ -506,7 +506,7 @@ float ximea_driver::getGain()
 
 float ximea_driver::getWBRed()
 {
-  if (!xiH_) return 0.0;
+  if (!xiH_) return -1.0;
 
   float value=0;
   xiGetParamFloat(xiH_, XI_PRM_WB_KR, &value);
@@ -517,7 +517,7 @@ float ximea_driver::getWBRed()
 
 float ximea_driver::getWBGreen()
 {
-  if (!xiH_) return 0.0;
+  if (!xiH_) return -1.0;
 
   float value=0;
   xiGetParamFloat(xiH_, XI_PRM_WB_KG, &value);
@@ -527,7 +527,7 @@ float ximea_driver::getWBGreen()
 
 float ximea_driver::getWBBlue()
 {
-  if (!xiH_) return 0.0;
+  if (!xiH_) return -1.0;
 
   float value=0;
   xiGetParamFloat(xiH_, XI_PRM_WB_KB, &value);

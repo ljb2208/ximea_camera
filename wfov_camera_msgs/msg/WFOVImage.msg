@@ -12,8 +12,12 @@ float32 shutter              	# Time duration (seconds) the shutter was open.  G
 
 float32 gain		     	# Gain (in dB) applied to the image.
 
-uint16 white_balance_blue    	# White balance in blue.
+float32 white_balance_blue    	# White balance in blue.
 
-uint16 white_balance_red     	# White balance in red.
+float32 white_balance_red     	# White balance in red.
+
+float32 white_balance_green		# White balance in green.
 
 float32 temperature          	# Temperature reported by the camera (Celsius).
+
+float32 exposure_time
