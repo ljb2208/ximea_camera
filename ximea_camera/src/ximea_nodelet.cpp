@@ -111,6 +111,7 @@ private:
 
     NODELET_INFO("Image format %s.", image_format.c_str());
 
+    ros::NodeHandle named_nh(getMTNodeHandle(), camera_name_);
 
     xm_ = ximea_driver(serial, camera_name_);
     xm_.readParamsFromFile(configuration_url);
@@ -128,10 +129,10 @@ private:
     // Start the camera info manager and attempt to load any configurations
     std::stringstream cinfo_name;
     cinfo_name << serial;
-    cinfo_.reset(new camera_info_manager::CameraInfoManager(nh, cinfo_name.str(), camera_info_url));
+    cinfo_.reset(new camera_info_manager::CameraInfoManager(named_nh, cinfo_name.str(), camera_info_url));
 
     // Publish topics using ImageTransport through camera_info_manager (gives cool things like compression)
-    it_.reset(new image_transport::ImageTransport(nh));
+    it_.reset(new image_transport::ImageTransport(named_nh));
     image_transport::SubscriberStatusCallback cb = boost::bind(&XimeaCameraNodelet::connectCb, this);
     it_pub_ = it_->advertiseCamera("image_raw", 5, cb, cb);
 
@@ -152,7 +153,7 @@ private:
     double max_acceptable; // The maximum publishing delay (in seconds) before warning.
     pnh.param<double>("max_acceptable_delay", max_acceptable, 0.2);
     ros::SubscriberStatusCallback cb2 = boost::bind(&XimeaCameraNodelet::connectCb, this);
-    pub_.reset(new diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage>(nh.advertise<wfov_camera_msgs::WFOVImage>("image", 5, cb2, cb2),
+    pub_.reset(new diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage>(named_nh.advertise<wfov_camera_msgs::WFOVImage>("image", 5, cb2, cb2),
                updater_,
                diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_, freq_tolerance, window_size),
                diagnostic_updater::TimeStampStatusParam(min_acceptable, max_acceptable))); 
@@ -329,13 +330,13 @@ private:
             ci_->header.stamp = wfov_image->image.header.stamp;
             ci_->header.frame_id = wfov_image->header.frame_id;
             // The height, width, distortion model, and parameters are all filled in by camera info manager.
-            ci_->binning_x = binning_x_;
-            ci_->binning_y = binning_y_;
-            ci_->roi.x_offset = roi_x_offset_;
-            ci_->roi.y_offset = roi_y_offset_;
-            ci_->roi.height = roi_height_;
-            ci_->roi.width = roi_width_;
-            ci_->roi.do_rectify = do_rectify_;
+            ci_->binning_x = 0;
+            ci_->binning_y = 0;
+            ci_->roi.x_offset = 0;
+            ci_->roi.y_offset = 0;
+            ci_->roi.height = 0;
+            ci_->roi.width = 0;
+            ci_->roi.do_rectify = false;
 
             wfov_image->info = *ci_;
 
@@ -379,7 +380,7 @@ private:
     // Check if we should disconnect (there are 0 subscribers to our data)
     if(it_pub_.getNumSubscribers() == 0 && pub_->getPublisher().getNumSubscribers() == 0)
     {
-      if (pubThread_)
+      /* if (pubThread_)
       {
         NODELET_DEBUG("Disconnecting.");
         pubThread_->interrupt();
@@ -407,11 +408,12 @@ private:
         catch(std::runtime_error& e)
         {
           NODELET_ERROR("%s", e.what());
-        }
-      }
+        } 
+      }*/
     }
     else if(!pubThread_)     // We need to connect
     {
+      NODELET_INFO("Connecting.");
       // Start the thread to loop through and publish messages
       pubThread_.reset(new boost::thread(boost::bind(&XimeaCameraNodelet::devicePoll, this)));
     }

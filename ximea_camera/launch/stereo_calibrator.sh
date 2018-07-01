@@ -1,0 +1,1 @@
+rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.108 right:=/ximea_stereo/rightCamera/image_raw left:=/ximea_stereo/leftCamera/image_raw right_camera:=/ximea_stereo/rightCamera left_camera:=/ximea_stereo/leftCamera --approximate=0.01
