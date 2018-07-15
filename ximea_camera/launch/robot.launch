@@ -1,0 +1,10 @@
+<launch>
+<!-- Camera Node -->
+<param name="robot_description" textfile="$(find autorally_core)/launch/robot.urdf"/>
+  
+  
+  <node pkg="robot_state_publisher_urdf" type="robot_state_publisher_urdf" name="rob_st_pub" >     
+    <param name="robot_description" textfile="$(find autorally_core)/launch/robot.urdf"/>       
+    </node>
+
+</launch>
