@@ -15,6 +15,20 @@ All rights reserved.
 #include <algorithm>
 #include <boost/make_shared.hpp>
 
+ximea_ros_driver::ximea_ros_driver(const ros::NodeHandle &nh, std::string cam_name, int serial_no , std::string yaml_url, std::string file_name, std::string frame_id) : ximea_driver(serial_no, cam_name, file_name, frame_id) 
+{
+  pnh_ = nh;
+  cam_info_manager_ = boost::make_shared<camera_info_manager::CameraInfoManager>(pnh_, cam_name_);
+  cam_info_manager_->loadCameraInfo(yaml_url);
+  it_ = boost::make_shared<image_transport::ImageTransport>(nh);
+  ros_cam_pub_ = it_->advertise(std::string("image_raw"), 1);
+  cam_info_pub_ = pnh_.advertise<sensor_msgs::CameraInfo>(std::string("camera_info"), 1);
+
+  publish_ = false;
+  image_transport::SubscriberStatusCallback cb = boost::bind(&ximea_ros_driver::connectCb, this);
+  ros::SubscriberStatusCallback cb2 = boost::bind(&ximea_ros_driver::connectCb, this);
+}
+
 ximea_ros_driver::ximea_ros_driver(const ros::NodeHandle &nh, std::string cam_name, int serial_no, std::string yaml_url): ximea_driver(serial_no, cam_name)
 {
   pnh_ = nh;
@@ -23,6 +37,10 @@ ximea_ros_driver::ximea_ros_driver(const ros::NodeHandle &nh, std::string cam_na
   it_ = boost::make_shared<image_transport::ImageTransport>(nh);
   ros_cam_pub_ = it_->advertise(std::string("image_raw"), 1);
   cam_info_pub_ = pnh_.advertise<sensor_msgs::CameraInfo>(std::string("camera_info"), 1);
+
+  publish_ = false;
+  image_transport::SubscriberStatusCallback cb = boost::bind(&ximea_ros_driver::connectCb, this);
+  ros::SubscriberStatusCallback cb2 = boost::bind(&ximea_ros_driver::connectCb, this);
 }
 
 ximea_ros_driver::ximea_ros_driver(const ros::NodeHandle &nh, std::string file_name) : ximea_driver(file_name)
@@ -33,6 +51,10 @@ ximea_ros_driver::ximea_ros_driver(const ros::NodeHandle &nh, std::string file_n
   it_ = boost::make_shared<image_transport::ImageTransport>(nh);
   ros_cam_pub_ = it_->advertise(std::string("image_raw"), 1);
   cam_info_pub_ = pnh_.advertise<sensor_msgs::CameraInfo>(std::string("camera_info"), 1);
+
+  publish_ = false;
+  image_transport::SubscriberStatusCallback cb = boost::bind(&ximea_ros_driver::connectCb, this);
+  ros::SubscriberStatusCallback cb2 = boost::bind(&ximea_ros_driver::connectCb, this);
 }
 
 void ximea_ros_driver::common_initialize(const ros::NodeHandle &nh)
@@ -47,6 +69,9 @@ void ximea_ros_driver::common_initialize(const ros::NodeHandle &nh)
 
 void ximea_ros_driver::publishImage(const ros::Time & now)
 {
+  if (!publish_)
+    return;
+
   cam_buffer_ = reinterpret_cast<char *>(image_.bp);
   cam_buffer_size_ = image_.width * image_.height * bpp_;
   ros_image_.data.resize(cam_buffer_size_);
@@ -54,6 +79,8 @@ void ximea_ros_driver::publishImage(const ros::Time & now)
   ros_image_.width = image_.width;
   ros_image_.height = image_.height;
   ros_image_.step = image_.width * bpp_;
+  ros_image_.header.frame_id = frame_id_;
+  ros_image_.header.stamp = now;
 
   copy(reinterpret_cast<char *>(cam_buffer_),
        (reinterpret_cast<char *>(cam_buffer_)) + cam_buffer_size_,
@@ -64,17 +91,38 @@ void ximea_ros_driver::publishImage(const ros::Time & now)
 
 void ximea_ros_driver::publishCamInfo(const ros::Time &now)
 {
+  if (!publish_)
+    return;
+
   ros_image_.header.stamp = now;
   cam_info_ = cam_info_manager_->getCameraInfo();
   cam_info_.header.frame_id = frame_id_;
+  cam_info_.header.stamp = now;
   cam_info_pub_.publish(cam_info_);
 }
 
 void ximea_ros_driver::publishImageAndCamInfo()
 {
   ros::Time now = ros::Time::now();
+  publishImageAndCamInfoWithTime(now);
+}
+
+void ximea_ros_driver::publishImageAndCamInfoWithTime(const ros::Time &now)
+{
   publishImage(now);
   publishCamInfo(now);
+}
+
+void ximea_ros_driver::connectCb()
+{
+  if(ros_cam_pub_.getNumSubscribers() == 0)
+  {
+    publish_ = false;
+  }
+  else
+  {
+    publish_ = true;
+  }
 }
 
 void ximea_ros_driver::setImageDataFormat(std::string image_format)
