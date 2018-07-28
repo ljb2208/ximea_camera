@@ -73,6 +73,14 @@ private:
     ros::NodeHandle &nh = getMTNodeHandle();
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
+    // set default values
+    binning_x_ = 0;
+    binning_y_ = 0;
+    roi_x_offset_ = 0;
+    roi_y_offset_ = 0;
+    roi_height_ = 0;
+    roi_width_ = 0;
+    do_rectify_ = false;
     // Get a serial number through ros
     int serial = 0;
 
@@ -324,19 +332,20 @@ private:
             ros::Time time = ros::Time::now();
             wfov_image->header.stamp = time;
             wfov_image->image.header.stamp = time;
+            wfov_image->image.header.frame_id = frame_id_;
 
             // Set the CameraInfo message
             ci_.reset(new sensor_msgs::CameraInfo(cinfo_->getCameraInfo()));
             ci_->header.stamp = wfov_image->image.header.stamp;
-            ci_->header.frame_id = wfov_image->header.frame_id;
+            ci_->header.frame_id = frame_id_;
             // The height, width, distortion model, and parameters are all filled in by camera info manager.
-            ci_->binning_x = 0;
-            ci_->binning_y = 0;
-            ci_->roi.x_offset = 0;
-            ci_->roi.y_offset = 0;
-            ci_->roi.height = 0;
-            ci_->roi.width = 0;
-            ci_->roi.do_rectify = false;
+            ci_->binning_x = binning_x_;
+            ci_->binning_y = binning_y_;
+            ci_->roi.x_offset = roi_x_offset_;
+            ci_->roi.y_offset = roi_y_offset_;
+            ci_->roi.height = roi_height_;
+            ci_->roi.width = roi_width_;
+            ci_->roi.do_rectify = do_rectify_;
 
             wfov_image->info = *ci_;
 
