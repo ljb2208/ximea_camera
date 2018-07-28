@@ -43,6 +43,7 @@ void ximea_driver::assignDefaultValues()
   auto_exposure_limit_ = 500000;
   auto_gain_limit_ = 2;
   auto_exposure_priority_ = 0.8;
+  trigger_source_ = 0;
 
   exposure_time_ = 1000;
   image_data_format_ = "XI_MONO8";
@@ -55,7 +56,7 @@ void ximea_driver::assignDefaultValues()
   image_.bp = NULL;
   image_.bp_size = 0;
   acquisition_active_ = false;
-  image_capture_timeout_ = 1000;
+  image_capture_timeout_ = 3000;
   frame_id_ = "";
 }
 
@@ -259,6 +260,7 @@ void ximea_driver::setROI(int l, int t, int w, int h)
 void ximea_driver::setOtherParams()
 {
   xiSetParamInt(xiH_, XI_PRM_TEMP_SELECTOR, XI_TEMP_SENSOR_BOARD); 
+  xiSetParamInt(xiH_, XI_PRM_TRG_SOURCE, trigger_source_);
 }
 
 void ximea_driver::setExposure(int time)
@@ -423,6 +425,12 @@ int ximea_driver::readParamsFromFile(std::string file_name)
   try
   {
     rect_width_ = doc["rect_width"].as<int>();
+  }
+  catch (std::runtime_error) {}
+
+  try
+  {
+    trigger_source_ = doc["trigger_source"].as<int>();
   }
   catch (std::runtime_error) {}
 

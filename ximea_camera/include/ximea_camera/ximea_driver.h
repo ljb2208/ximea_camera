@@ -103,6 +103,7 @@ protected:
   int rect_width_;
   int rect_height_;
   bool acquisition_active_;
+  int trigger_source_;
   std::string image_data_format_;  // One of XI_MONO8, XI_RGB24, XI_RGB32, XI_RAW
   std::string yaml_url_;
   HANDLE xiH_;  

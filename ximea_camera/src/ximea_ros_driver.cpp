@@ -16,17 +16,16 @@ All rights reserved.
 #include <boost/make_shared.hpp>
 
 ximea_ros_driver::ximea_ros_driver(const ros::NodeHandle &nh, std::string cam_name, int serial_no , std::string yaml_url, std::string file_name, std::string frame_id) : ximea_driver(serial_no, cam_name, file_name, frame_id) 
-{
-  pnh_ = nh;
+{ 
+  pnh_ = ros::NodeHandle(nh, cam_name);
   cam_info_manager_ = boost::make_shared<camera_info_manager::CameraInfoManager>(pnh_, cam_name_);
   cam_info_manager_->loadCameraInfo(yaml_url);
-  it_ = boost::make_shared<image_transport::ImageTransport>(nh);
-  ros_cam_pub_ = it_->advertise(std::string("image_raw"), 1);
+  it_ = boost::make_shared<image_transport::ImageTransport>(pnh_);
+  image_transport::SubscriberStatusCallback cb = boost::bind(&ximea_ros_driver::connectCb, this);  
+  ros_cam_pub_ = it_->advertise(std::string("image_raw"), 1, cb, cb);
   cam_info_pub_ = pnh_.advertise<sensor_msgs::CameraInfo>(std::string("camera_info"), 1);
 
-  publish_ = false;
-  image_transport::SubscriberStatusCallback cb = boost::bind(&ximea_ros_driver::connectCb, this);
-  ros::SubscriberStatusCallback cb2 = boost::bind(&ximea_ros_driver::connectCb, this);
+  publish_ = false; 
 }
 
 ximea_ros_driver::ximea_ros_driver(const ros::NodeHandle &nh, std::string cam_name, int serial_no, std::string yaml_url): ximea_driver(serial_no, cam_name)
@@ -69,6 +68,7 @@ void ximea_ros_driver::common_initialize(const ros::NodeHandle &nh)
 
 void ximea_ros_driver::publishImage(const ros::Time & now)
 {
+  
   if (!publish_)
     return;
 

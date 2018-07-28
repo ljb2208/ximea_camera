@@ -34,9 +34,9 @@ namespace ximea_camera
     }
 
     void StereoCameraNodelet::publishData()
-    {
+    {        
         while(!boost::this_thread::interruption_requested())   // Block until we need to stop this thread.
-        {
+        {            
             acquireImages();
             publishImages();
         }
@@ -44,18 +44,18 @@ namespace ximea_camera
 
     void StereoCameraNodelet::initializeTrigger(ros::NodeHandle pnh)
     {
-        pnh.param<std::string>("serial_port", serial_port, "");
-        port_.init(pnh, getName(), "", "CameraTrigger", serial_port, true);
+        pnh.param<std::string>("port", serial_port, "");
+        NODELET_INFO("Serial port: %s", serial_port.c_str());
+        port_.init(pnh, getName(), "", "ximea_camera", serial_port, true);
     }
 
     void StereoCameraNodelet::stopTrigger()
-    {
-
+    {        
     }
 
     void StereoCameraNodelet::triggerCameras()
     {
-        port_.writePort("TRG/r/n");
+        port_.writePort("#trg:");
     }
 
     void StereoCameraNodelet::startAcquisition(ros::NodeHandle pnh)
@@ -90,10 +90,9 @@ namespace ximea_camera
 
         NODELET_INFO("Image format %s.", image_format.c_str());
 
-        leftCamDriver = new ximea_ros_driver(pnh, left_camera_name, left_serial, left_configuration_url, left_camera_info_url, frame_id);
-        rightCamDriver = new ximea_ros_driver(pnh, right_camera_name, right_serial, right_configuration_url, right_camera_info_url, frame_id);
+        leftCamDriver = new ximea_ros_driver(pnh, left_camera_name, left_serial, left_camera_info_url, left_configuration_url, frame_id);
+        rightCamDriver = new ximea_ros_driver(pnh, right_camera_name, right_serial, right_camera_info_url, right_configuration_url, frame_id);
 
-        
         leftCamDriver->openDevice();
         rightCamDriver->openDevice();
         leftCamDriver->startAcquisition();

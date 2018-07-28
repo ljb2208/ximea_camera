@@ -1,0 +1,50 @@
+<launch>
+   <!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
+       If not specified, defaults to first camera found. -->
+  <arg name="left_camera_name" default="left" />
+  <arg name="right_camera_name" default="right" />
+  <arg name="left_camera_serial" default="31703351" />
+  <arg name="right_camera_serial" default="32703551" />
+  <arg name="calibrated" default="1" />
+  <arg name="exposure_time" default="30000" />
+  <arg name="rect_left" default="0" />
+  <arg name="rect_top" default="0" />
+  <arg name="rect_height" default="1024" />
+  <arg name="rect_width" default="1280" />
+  <arg name="image_data_format" default="XI_RGB24" />
+
+  <group ns="ximea_stereo">
+    <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
+
+    <node pkg="nodelet" type="nodelet" name="stereo_camera_nodelet"
+          args="load ximea_camera/StereoCameraNodelet camera_nodelet_manager" >
+        <param name="frame_id" value="stereo_camera" />        
+        <param name="image_data_format" value="$(arg image_data_format)" />
+
+        <!-- params for left camera -->
+        <param name="left_serial" value="$(arg left_camera_serial)" />
+        <param name="left_camera_name" value="$(arg left_camera_name)" />
+        <param name="left_camera_info_url" if="$(arg calibrated)"
+                value="file://$(find ximea_camera)/config/$(arg left_camera_serial).yaml" />
+        <param name="left_yaml_url" value="$(find ximea_camera)/config/ximeaLeft.yaml" />
+
+        <!-- params for right camera -->
+        <param name="right_serial" value="$(arg right_camera_serial)" />
+        <param name="right_camera_name" value="$(arg right_camera_name)" />
+        <param name="right_camera_info_url" if="$(arg calibrated)"
+                value="file://$(find ximea_camera)/config/$(arg right_camera_serial).yaml" />
+        <param name="right_yaml_url" value="$(find ximea_camera)/config/ximeaRight.yaml" />
+
+        <!-- params for camera trigger -->
+        <param name="port" value="/dev/arArduino" />
+        <!--configure settings for 115200 baud, 8N1 -->
+        <param name="serialBaud" value="115200" />
+        <param name="serialDataBits" value="8" />
+        <param name="serialParity" value="none" />
+        <param name="serialStopBits" value="1" />
+        <param name="serialHardwareFlow" value="false" />
+        <param name="serialSoftwareFlow" value="false" />
+
+    </node>        
+  </group>
+</launch>
