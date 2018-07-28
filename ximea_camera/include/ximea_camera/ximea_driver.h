@@ -34,6 +34,7 @@ class ximea_driver
 public:
   explicit ximea_driver(int serial_no = 0 , std::string cam_name = "");  // if no serial no is specified select the first cam on the bus
   explicit ximea_driver(std::string file_name);
+  explicit ximea_driver(int serial_no, std::string cam_name, std::string file_name, std::string frame_id);
 
   int readParamsFromFile(std::string file_name);
   void applyParameters();
@@ -75,6 +76,7 @@ public:
 
   void setGain(float gain);
   void setWhiteBalance(float red, float green, float blue);
+
 
   XI_IMG image_;
 

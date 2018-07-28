@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   image_exposure_msgs
   wfov_camera_msgs
+  autorally_core
 )
 
 find_package(Boost REQUIRED COMPONENTS system thread)
@@ -50,6 +51,10 @@ set(XIMEA_SRC
 add_library(XimeaCameraNodelet src/ximea_nodelet.cpp ${XIMEA_SRC})
 target_link_libraries(XimeaCameraNodelet ${XIMEA_LIBRARY} ${Boost_LIBRARIES} yaml-cpp ${catkin_LIBRARIES})
 add_dependencies(XimeaCameraNodelet ${catkin_EXPORTED_TARGETS})
+
+add_library(StereoCameraNodelet src/stereo_nodelet.cpp ${XIMEA_SRC})
+target_link_libraries(StereoCameraNodelet ${XIMEA_LIBRARY} ${Boost_LIBRARIES} yaml-cpp ${catkin_LIBRARIES})
+add_dependencies(StereoCameraNodelet ${catkin_EXPORTED_TARGETS})
 
 add_executable(ximea_camera_node ${XIMEA_SRC})
 target_link_libraries(

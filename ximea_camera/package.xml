@@ -38,6 +38,9 @@
   <build_depend>nodelet</build_depend>
   <run_depend>nodelet</run_depend>
 
+  <build_depend>autorally_core</build_depend>
+  <run_depend>autorally_core</run_depend>
+
   <build_depend>sensor_msgs</build_depend>
   <build_depend>message_generation</build_depend>
   <run_depend>sensor_msgs</run_depend>
