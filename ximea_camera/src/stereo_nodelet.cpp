@@ -20,11 +20,39 @@ namespace ximea_camera
         
     }
 
+    void StereoCameraNodelet::reconfigureCallback(ximea_camera::XimeaSettingsConfig &config, uint32_t level)
+    {
+        if (leftCamDriver)
+        {
+            leftCamDriver->setTrigger(config.trigger);
+            leftCamDriver->setAutoExposure(config.auto_exposure);
+
+            if (!config.auto_exposure)
+                leftCamDriver->setExposure(config.exposure);
+        }
+
+        if (rightCamDriver)
+        {
+            rightCamDriver->setTrigger(config.trigger);
+            rightCamDriver->setAutoExposure(config.auto_exposure);
+
+            if (!config.auto_exposure)
+                rightCamDriver->setExposure(config.exposure);
+        }        
+    }
+
     void StereoCameraNodelet::onInit()
     {
+        leftCamDriver = NULL;
+        rightCamDriver = NULL;
+
         // Get nodeHandles
         ros::NodeHandle &nh = getMTNodeHandle();
         ros::NodeHandle &pnh = getMTPrivateNodeHandle();
+
+        // setup dyn reconfigure
+        dr_cb = boost::bind(&StereoCameraNodelet::reconfigureCallback, this, _1, _2);
+        dr_server.setCallback(dr_cb);
 
         initializeTrigger(pnh);
         startAcquisition(pnh);        

@@ -59,6 +59,7 @@ public:
   void setAutoGainLimit(int ag_limit);
   void setAutoExposurePriority(float exp_priority);
   void setOtherParams();
+  void setTrigger(int trigger_type);
   bool hasValidHandle()
   {
     return xiH_ == NULL ? false : true;

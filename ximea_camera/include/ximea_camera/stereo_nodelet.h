@@ -11,6 +11,8 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <camera_info_manager/camera_info_manager.h>
+#include <dynamic_reconfigure/server.h>
+#include <ximea_camera/XimeaSettingsConfig.h>
 #include <autorally_core/SerialInterfaceThreaded.h>
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -41,6 +43,8 @@ class StereoCameraNodelet: public nodelet::Nodelet
         void initializeTrigger(ros::NodeHandle pnh);
         void stopTrigger();
 
+        void reconfigureCallback(ximea_camera::XimeaSettingsConfig &config, uint32_t level);
+
         std::string frame_id;
         std::string serial_port;
 
@@ -53,6 +57,9 @@ class StereoCameraNodelet: public nodelet::Nodelet
         boost::shared_ptr<boost::thread> pubThread_; ///< The thread that reads and publishes the images.
 
         SerialInterfaceThreaded port_; ///<Serial port for arduino data
+
+        dynamic_reconfigure::Server<ximea_camera::XimeaSettingsConfig> dr_server;        
+        dynamic_reconfigure::Server<ximea_camera::XimeaSettingsConfig>::CallbackType dr_cb;
 };
 
 PLUGINLIB_EXPORT_CLASS(ximea_camera::StereoCameraNodelet, nodelet::Nodelet)  // Needed for Nodelet declaration

@@ -23,16 +23,6 @@ ximea_driver::ximea_driver(int serial_no, std::string cam_name)
   assignDefaultValues();
 }
 
-ximea_driver::ximea_driver(int serial_no, std::string cam_name, std::string file_name, std::string frame_id)
-{ 
-  assignDefaultValues();
-  readParamsFromFile(file_name);
-  serial_no_ = serial_no;
-  cam_name_ = cam_name;
-  frame_id_ = frame_id;
-  ROS_INFO_STREAM("ximea_driver: reading paramter values from file: " << file_name);
-}
-
 void ximea_driver::assignDefaultValues()
 {
   cams_on_bus_ = 4;
@@ -43,7 +33,6 @@ void ximea_driver::assignDefaultValues()
   auto_exposure_limit_ = 500000;
   auto_gain_limit_ = 2;
   auto_exposure_priority_ = 0.8;
-  trigger_source_ = 0;
 
   exposure_time_ = 1000;
   image_data_format_ = "XI_MONO8";
@@ -56,7 +45,7 @@ void ximea_driver::assignDefaultValues()
   image_.bp = NULL;
   image_.bp_size = 0;
   acquisition_active_ = false;
-  image_capture_timeout_ = 3000;
+  image_capture_timeout_ = 1000;
   frame_id_ = "";
 }
 
@@ -260,7 +249,6 @@ void ximea_driver::setROI(int l, int t, int w, int h)
 void ximea_driver::setOtherParams()
 {
   xiSetParamInt(xiH_, XI_PRM_TEMP_SELECTOR, XI_TEMP_SENSOR_BOARD); 
-  xiSetParamInt(xiH_, XI_PRM_TRG_SOURCE, trigger_source_);
 }
 
 void ximea_driver::setExposure(int time)
@@ -311,8 +299,9 @@ void ximea_driver::setAutoExposurePriority(float exp_priority)
   if (!stat)
   {
     // auto_exposureme_ = time;
-   }
+  }
 }
+
 
 int ximea_driver::readParamsFromFile(std::string file_name)
 {
@@ -430,12 +419,6 @@ int ximea_driver::readParamsFromFile(std::string file_name)
 
   try
   {
-    trigger_source_ = doc["trigger_source"].as<int>();
-  }
-  catch (std::runtime_error) {}
-
-  try
-  {
     rect_height_ = doc["rect_height"].as<int>();
   }
   catch (std::runtime_error) {}
@@ -489,6 +472,12 @@ void ximea_driver::triggerDevice()
   default:
     break;
   }
+}
+
+void ximea_driver::setTrigger(int trigger_type)
+{
+  if (!xiH_) return;
+  xiSetParamInt(xiH_, XI_PRM_TRG_SOURCE, trigger_type);
 }
 
 void ximea_driver::limitBandwidth(int mbps)
