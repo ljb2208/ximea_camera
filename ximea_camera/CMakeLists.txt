@@ -35,7 +35,7 @@ generate_messages(
 
 catkin_package(
   LIBRARIES ximea_camera
-  CATKIN_DEPENDS roscpp nodelet message_runtime sensor_msgs image_exposure_msgs
+  CATKIN_DEPENDS roscpp nodelet message_runtime sensor_msgs image_exposure_msgs dynamic_reconfigure
   DEPENDS system_lib TinyXML
   DEPENDS boost
 )
@@ -62,6 +62,15 @@ add_dependencies(XimeaCameraNodelet ${catkin_EXPORTED_TARGETS})
 add_library(StereoCameraNodelet src/stereo_nodelet.cpp ${XIMEA_SRC})
 target_link_libraries(StereoCameraNodelet ${XIMEA_LIBRARY} ${Boost_LIBRARIES} yaml-cpp ${catkin_LIBRARIES})
 add_dependencies(StereoCameraNodelet ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+
+add_executable(ximea_camera_node ${XIMEA_SRC})
+target_link_libraries(
+    ximea_camera_node
+    ${XIMEA_LIBRARY}
+    ${catkin_LIBRARIES}
+    yaml-cpp
+    ${Boost_LIBRARIES}
+)
 
 # ROSLINT
 set(ROSLINT_CPP_OPTS  "--filter=-whitespace/line_length,-readability/todo" )
