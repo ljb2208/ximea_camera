@@ -45,7 +45,7 @@ public:
   void closeDevice();
   void startAcquisition();
   void stopAcquisition();
-  void acquireImage();
+  int acquireImage();
   void triggerDevice();
   int getSerialNo() const
   {
@@ -58,6 +58,7 @@ public:
   void setAutoExposureLimit(int ae_limit);
   void setAutoGainLimit(int ag_limit);
   void setAutoExposurePriority(float exp_priority);
+  void setAutoWB(int auto_wb);
   void setOtherParams();
   void setTrigger(int trigger_type);
   bool hasValidHandle()
@@ -77,6 +78,7 @@ public:
 
   void setGain(float gain);
   void setWhiteBalance(float red, float green, float blue);
+  XI_IMG* getAcquiredImage();
 
 
   XI_IMG image_;
@@ -110,6 +112,7 @@ protected:
   HANDLE xiH_;  
   int image_capture_timeout_;  // max amount of time to wait for an image to come in
   unsigned char trigger_mode_;
+  int auto_wb_;
 };
 
 #endif  // XIMEA_CAMERA_XIMEA_DRIVER_H

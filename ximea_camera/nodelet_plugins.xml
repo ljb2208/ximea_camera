@@ -3,6 +3,11 @@
     <description>This is the nodelet for the Ximea Camera Driver.</description>
   </class>
 </library>
+<library path="lib/libXimeaCameraNodelet2">
+  <class name="ximea_camera/XimeaCameraNodelet2" type="ximea_camera::XimeaCameraNodelet2" base_class_type="nodelet::Nodelet">
+    <description>This is the nodelet for the Ximea Camera Driver.</description>
+  </class>
+</library>
 <library path="lib/libStereoCameraNodelet">
   <class name="ximea_camera/StereoCameraNodelet" type="ximea_camera::StereoCameraNodelet" base_class_type="nodelet::Nodelet">
     <description>This is the Stereo Camera nodelet for the Ximea Camera Driver.</description>

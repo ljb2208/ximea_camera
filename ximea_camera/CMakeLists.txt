@@ -59,6 +59,10 @@ add_library(XimeaCameraNodelet src/ximea_nodelet.cpp ${XIMEA_SRC})
 target_link_libraries(XimeaCameraNodelet ${XIMEA_LIBRARY} ${Boost_LIBRARIES} yaml-cpp ${catkin_LIBRARIES})
 add_dependencies(XimeaCameraNodelet ${catkin_EXPORTED_TARGETS})
 
+add_library(XimeaCameraNodelet2 src/ximea_nodelet2.cpp ${XIMEA_SRC})
+target_link_libraries(XimeaCameraNodelet2 ${XIMEA_LIBRARY} ${Boost_LIBRARIES} yaml-cpp ${catkin_LIBRARIES})
+add_dependencies(XimeaCameraNodelet2 ${catkin_EXPORTED_TARGETS})
+
 add_library(StereoCameraNodelet src/stereo_nodelet.cpp ${XIMEA_SRC})
 target_link_libraries(StereoCameraNodelet ${XIMEA_LIBRARY} ${Boost_LIBRARIES} yaml-cpp ${catkin_LIBRARIES})
 add_dependencies(StereoCameraNodelet ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)

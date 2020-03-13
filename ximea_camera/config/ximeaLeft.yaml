@@ -1,7 +1,8 @@
 serial_no: 31703351
 cam_name: "cameraLeft"
 yaml_url: "package://autorally_core/calibrations/cameraLeft.yaml"
-exposure_time: 6000
+auto_exposure: 1
+exposure_time: 10000
 rect_left: 0
 rect_top: 0
 rect_height: 1024

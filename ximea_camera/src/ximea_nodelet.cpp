@@ -67,7 +67,7 @@ public:
   }
 
 private:
-  void onInit()
+  virtual void onInit()
   {
     // Get nodeHandles
     ros::NodeHandle &nh = getMTNodeHandle();
@@ -117,13 +117,20 @@ private:
     pnh.param<std::string>("camera_name", camera_name_, "camera");
     pnh.param<std::string>("image_data_format", image_format, "");
 
-    NODELET_INFO("Image format %s.", image_format.c_str());
+    NODELET_INFO("ZZ Image format %s.", image_format.c_str());
 
     ros::NodeHandle named_nh(getMTNodeHandle(), camera_name_);
 
     xm_ = ximea_driver(serial, camera_name_);
     xm_.readParamsFromFile(configuration_url);
+
+    NODELET_INFO("Configuration url: %s", configuration_url.c_str());
+    NODELET_INFO("Camera Info url: %s", camera_info_url.c_str());
+
+    std::cout << "Testing......\r\n";
+    
     setImageDataFormat(image_format);    
+    xm_.applyParameters();
 
     // Do not call the connectCb function until after we are done initializing.
     boost::mutex::scoped_lock scopedLock(connect_mutex_);
@@ -241,6 +248,7 @@ private:
           {
             NODELET_DEBUG("Connecting to camera.");
             xm_.openDevice();
+            NODELET_INFO("Apply parameters.");            
             NODELET_INFO("Connected to camera.");
 
             // Set last configuration, forcing the reconfigure level to stop

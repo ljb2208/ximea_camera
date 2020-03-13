@@ -29,8 +29,7 @@ ximea_driver::ximea_driver(int serial_no, std::string cam_name, std::string file
   readParamsFromFile(file_name);
   serial_no_ = serial_no;
   cam_name_ = cam_name;
-  frame_id_ = frame_id;
-  ROS_INFO_STREAM("ximea_driver: reading paramter values from file: " << file_name);
+  frame_id_ = frame_id;  
 }
 
 
@@ -41,8 +40,8 @@ void ximea_driver::assignDefaultValues()
   binning_enabled_ = false;
   downsample_factor_ = false;
   auto_exposure_ = 0;
-  auto_exposure_limit_ = 500000;
-  auto_gain_limit_ = 2;
+  auto_exposure_limit_ = 100000;
+  auto_gain_limit_ = 14;
   auto_exposure_priority_ = 0.8;
   trigger_source_ = 0;
 
@@ -59,6 +58,7 @@ void ximea_driver::assignDefaultValues()
   acquisition_active_ = false;
   image_capture_timeout_ = 1000;
   frame_id_ = "";
+  auto_wb_ = 1;
 }
 
 ximea_driver::ximea_driver(std::string file_name)
@@ -80,17 +80,21 @@ void ximea_driver::errorHandling(XI_RETURN ret, std::string message)
 
 void ximea_driver::applyParameters()
 {
+  std::cout << " Applying Parameters\r\n";  
   setImageDataFormat(image_data_format_);
   if (0 == auto_exposure_) {
       setExposure(exposure_time_);
   } else {
+      std::cout << "Setting autoexposure\r\n";
       setAutoExposure(auto_exposure_);
       setAutoExposureLimit(auto_exposure_limit_);
       setAutoGainLimit(auto_gain_limit_);
       setAutoExposurePriority(auto_exposure_priority_);
   }
   setROI(rect_left_, rect_top_, rect_width_, rect_height_);
-  setOtherParams();
+  setAutoWB(auto_wb_);
+  
+  // setOtherParams();
 }
 
 void ximea_driver::openDevice()
@@ -143,17 +147,25 @@ void ximea_driver::startAcquisition()
   acquisition_active_ = true;
 }
 
-void ximea_driver::acquireImage()
+int ximea_driver::acquireImage()
 {
   if (!hasValidHandle())
   {
-    return;
+    return -1;
   }
   XI_RETURN stat = xiGetImage(xiH_, image_capture_timeout_, &image_);
   if (stat != 0)
   {
     std::cout << "Error on" << cam_name_ << " with error " <<  stat << std::endl;
+    return (int) stat;
   }
+
+  return 0;
+}
+
+XI_IMG* ximea_driver::getAcquiredImage()
+{
+    return &image_;
 }
 
 void ximea_driver::setImageDataFormat(std::string image_format)
@@ -283,6 +295,16 @@ void ximea_driver::setAutoExposure(int auto_exposure)
   }
 }
 
+void ximea_driver::setAutoWB(int auto_wb)
+{
+  XI_RETURN stat = xiSetParamInt(xiH_, XI_PRM_AUTO_WB, auto_wb);
+  errorHandling(stat, "xiOSetParamInt (AutoExposure Time)");
+  if (!stat)
+  {
+    // auto_exposureme_ = time;
+  }
+}
+
 void ximea_driver::setAutoExposureLimit(int ae_limit)
 {
   XI_RETURN stat = xiSetParamFloat(xiH_, XI_PRM_AE_MAX_LIMIT, ae_limit);
@@ -376,6 +398,13 @@ int ximea_driver::readParamsFromFile(std::string file_name)
     exposure_time_ = doc["exposure_time"].as<int>();
   }
   catch (std::runtime_error) {}
+
+  try
+  {
+    auto_wb_ = doc["auto_wb"].as<int>();
+  }
+  catch (std::runtime_error) {}
+
 
   try
   {
@@ -580,7 +609,12 @@ float ximea_driver::getWBBlue()
   {
     if (!xiH_) return;
 
-    xiSetParamFloat(xiH_, XI_PRM_WB_KR, red);
-    xiSetParamFloat(xiH_, XI_PRM_WB_KG, green);
-    xiSetParamFloat(xiH_, XI_PRM_WB_KB, blue);
+    if (red > 0.0)
+      xiSetParamFloat(xiH_, XI_PRM_WB_KR, red);
+
+    if (green > 0.0)
+      xiSetParamFloat(xiH_, XI_PRM_WB_KG, green);
+
+    if (blue > 0.0)
+      xiSetParamFloat(xiH_, XI_PRM_WB_KB, blue);
   }
